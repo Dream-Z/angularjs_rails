@@ -2,27 +2,68 @@
  * Created by lexx on 9/21/15.
  */
 
-angular.module('flapperNews', [])
+angular.module('flapperNews', ['ui.router'])
+    .config([
+        '$stateProvider',
+        '$urlRouterProvider',
+        function($stateProvider, $urlRouterProvider){
+            $stateProvider
+                .state('home', {
+                    url: '/home',
+                    templateUrl: '/home.html',
+                    controller: 'MainCtrl'
+                })
+                .state('posts', {
+                    url: '/posts/{id}',
+                    templateUrl: '/posts.html',
+                    controller: 'PostsCtrl'
+                });
+            $urlRouterProvider.otherwise('home');
+        }
+    ])
+    .factory('posts', [function(){
+        // .......
+        var o = {
+            posts: []
+        };
+        return o;
+    }])
+
+    .controller('PostsCtrl', [
+        '$scope',
+        '$stateParams',
+        'posts',
+        function($scope, $stateParams, posts){
+            // ...
+            $scope.posts = posts.posts[$stateParams.id];
+        }
+    ])
+
     .controller('MainCtrl', [
         '$scope',
-        function($scope){
-            $scope.test = 'Hello world!';
+        'posts',
+        function($scope, posts){
+            $scope.posts = posts.posts;
 
-            $scope.posts = [
-                { title: 'post1', upvotes: 5 },
-                { title: 'post2', upvotes: 2 },
-                { title: 'post3', upvotes: 15 },
-                { title: 'post4', upvotes: 9 },
-                { title: 'post5', upvotes: 4 },
-                { title: 'post6', upvotes: 51 }
-            ];
+            //$scope.posts = [
+            //    { title: 'post1', upvotes: 5 },
+            //    { title: 'post2', upvotes: 2 },
+            //    { title: 'post3', upvotes: 15 },
+            //    { title: 'post4', upvotes: 9 },
+            //    { title: 'post5', upvotes: 4 },
+            //    { title: 'post6', upvotes: 51 }
+            //];
 
             $scope.addPost = function(){
                 if(!$scope.title || $scope.title === '') { return; }
                 $scope.posts.push({
                     title: $scope.title,
                     link: $scope.link,
-                    upvotes: Math.round(Math.random()*10)
+                    upvotes: Math.round(Math.random()*10),
+                    comments: [
+                        {author: 'Joe', body: 'Cool post', upvotes: 0},
+                        {author: 'Bob', body: 'Great idea but everything is wrong', upvotes: 0}
+                    ]
                 });
                 $scope.title = '';
                 $scope.link = '';
@@ -30,6 +71,9 @@ angular.module('flapperNews', [])
 
             $scope.incrementUpvotes = function(post){
               post.upvotes += 1;
+            };
+            $scope.decrementUpvotes = function(post){
+                  post.upvotes -= 1;
             };
         }
     ]
